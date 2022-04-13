@@ -12,6 +12,9 @@
 
 (global directions [
                     [0 0]
+                    [0 0]
+                    [0 0]
+                    [0 0]
                     [1 0]
                     [1 1]
                     [0 1]
@@ -54,12 +57,21 @@
   (set p.frame (+ p.startframe (% (* (t) 2) (+ 1 p.maxframe))))
   (set p.x (+ p.x (* p.maxspeed (. (. directions p.direction) 1))))
   (set p.y (+ p.y (* p.maxspeed (. (. directions p.direction) 2))))
+
+  (if (> p.x 120)
+      (set p.x 120))
+  (if (< p.x 0)
+      (set p.x 0))
+  (if (> p.y 120)
+      (set p.y 120))
+  (if (< p.y 0)
+      (set p.y 0))
+
+
   (set last-time time))
 
 (fn _init []
-  (make-window test 0 0 0 0)
-  ;; (music 0)
-  )
+  (music 0))
 
 (fn _update []
   (player_update))
@@ -67,7 +79,4 @@
 (fn _draw []
   (cls 0)
   (draw-player)
-  (print p.direction)
-  (print (. (. directions p.direction) 1))
-  (print p.x)
-  (print p.y))
+  )

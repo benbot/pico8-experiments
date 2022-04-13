@@ -2,7 +2,7 @@ pico-8 cartridge // http://www.pico-8.com
 version 36
 __lua__
 p = {x = 58, y = 58, maxspeed = 0.5, maxaccel = 5, vel = {0, 0}, acc = {0, 0}, startframe = 1, frame = 1, maxframe = 1, direction = 4}
-directions = {{0, 0}, {1, 0}, {1, 1}, {0, 1}, {0, 0}, {-1, 0}, {-1, -1}, {0, -1}, {1, -1}, {-1, 1}}
+directions = {{0, 0}, {0, 0}, {0, 0}, {0, 0}, {1, 0}, {1, 1}, {0, 1}, {0, 0}, {-1, 0}, {-1, -1}, {0, -1}, {1, -1}, {-1, 1}}
 local function make_window(name, x, y, w, h, drawfn)
   local name0
   local _1_
@@ -35,11 +35,33 @@ local function player_update()
   p.frame = (p.startframe + ((t() * 2) % (1 + p.maxframe)))
   p.x = (p.x + (p.maxspeed * directions[p.direction][1]))
   p.y = (p.y + (p.maxspeed * directions[p.direction][2]))
+  if (p.x > 120) then
+    p.x = 120
+  else
+  end
+  if (p.x < 0) then
+    p.x = 0
+  else
+  end
+  if (p.y > 120) then
+    p.y = 120
+  else
+  end
+  if (p.y < 0) then
+    p.y = 0
+  else
+  end
   last_time = time
   return nil
 end
+local function draw_textbox()
+  local rect_w = 100
+  local rect_h = 30
+  return print(rect_w)
+end
 local function _init()
-  return make_window(test, 0, 0, 0, 0)
+  make_window(test, 0, 0, 0, 0)
+  return music(0)
 end
 local function _update()
   return player_update()
@@ -47,10 +69,7 @@ end
 local function _draw()
   cls(0)
   draw_player()
-  print(p.direction)
-  print(directions[p.direction][1])
-  print(p.x)
-  return print(p.y)
+  return draw_textbox()
 end
 __gfx__
 00000000007007000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
