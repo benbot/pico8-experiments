@@ -1,8 +1,9 @@
 pico-8 cartridge // http://www.pico-8.com
 version 36
 __lua__
-p = {x = 58, y = 58, maxspeed = 0.5, maxaccel = 5, vel = {0, 0}, acc = {0, 0}, startframe = 1, frame = 1, maxframe = 1, direction = 4}
+pet = {x = 58, y = 58, maxspeed = 0.5, maxaccel = 5, vel = {0, 0}, acc = {0, 0}, startframe = 1, frame = 1, ["anim-length"] = 1, hunger = 50, maxhunger = 100, direction = {1, 0}}
 directions = {{0, 0}, {0, 0}, {0, 0}, {0, 0}, {1, 0}, {1, 1}, {0, 1}, {0, 0}, {-1, 0}, {-1, -1}, {0, -1}, {1, -1}, {-1, 1}}
+local fc = 1
 local function make_window(name, x, y, w, h, drawfn)
   local name0
   local _1_
@@ -17,69 +18,99 @@ local function make_window(name, x, y, w, h, drawfn)
   name0 = {x = x, y = y, w = w, h = h, ["text-lines"] = {}, drawfn = _1_}
   return nil
 end
-local function draw_player()
-  return spr(p.frame, p.x, p.y)
+local function draw_pet()
+  palt(0, nil)
+  palt(12, t)
+  spr(pet.frame, pet.x, pet.y)
+  palt(0, t)
+  return palt(12, nil)
 end
-local init_dir_timer = 1
-local dir_timer = init_dir_timer
-local last_time = 0
-local function player_update()
-  local time = t()
-  local delta = (time - last_time)
-  if (dir_timer <= 0) then
-    p.direction = (1 + flr(rnd(#directions)))
-    dir_timer = init_dir_timer
+local function idle_anim()
+  if (0 == (fc % 30)) then
+    if (pet.frame == (pet.startframe + pet["anim-length"])) then
+      pet.frame = pet.startframe
+      return nil
+    else
+      pet.frame = (1 + pet.frame)
+      return nil
+    end
   else
-    dir_timer = (dir_timer - delta)
+    return nil
   end
-  p.frame = (p.startframe + ((t() * 2) % (1 + p.maxframe)))
-  p.x = (p.x + (p.maxspeed * directions[p.direction][1]))
-  p.y = (p.y + (p.maxspeed * directions[p.direction][2]))
-  if (p.x > 120) then
-    p.x = 120
-  else
-  end
-  if (p.x < 0) then
-    p.x = 0
-  else
-  end
-  if (p.y > 120) then
-    p.y = 120
-  else
-  end
-  if (p.y < 0) then
-    p.y = 0
-  else
-  end
-  last_time = time
-  return nil
 end
-local function draw_textbox()
-  local rect_w = 100
-  local rect_h = 30
-  return print(rect_w)
+local function change_dir()
+  local walk_chance = flr(rnd(100))
+  if (walk_chance < 30) then
+    pet.direction = flr(rnd(#directions))
+    pet.y = flr(pet.y)
+    pet.x = flr(pet.x)
+    return nil
+  else
+    return nil
+  end
+end
+local function walk()
+  pet.x = (pet.x + (pet.maxspeed * pet.direction[1]))
+  pet.y = (pet.y + (pet.maxspeed * pet.direction[2]))
+  if (120 < pet.x) then
+    pet.x = 120
+  else
+  end
+  if (0 > pet.x) then
+    pet.x = 0
+  else
+  end
+  if (120 < pet.y) then
+    pet.y = 120
+  else
+  end
+  if (0 > pet.y) then
+    pet.y = 0
+    return nil
+  else
+    return nil
+  end
+end
+local function pet_update()
+  idle_anim()
+  walk()
+  if (0 == (fc % 20)) then
+    if (45 < flr(rnd(100))) then
+      pet.direction = rnd(directions)
+    else
+    end
+  else
+  end
+  if (pet.hunger < 10) then
+    pet.startframe = 3
+    return nil
+  else
+    return nil
+  end
 end
 local function _init()
-  make_window(test, 0, 0, 0, 0)
   return music(0)
 end
 local function _update()
-  return player_update()
+  return pet_update()
 end
 local function _draw()
-  cls(0)
-  draw_player()
-  return draw_textbox()
+  cls(15)
+  draw_pet()
+  print(pet.direction[1], 0)
+  print(pet.y, 0)
+  fc = (fc + 1)
+  return nil
 end
 __gfx__
-00000000007007000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00000000077777700070070000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00700700770000770777777000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00077000708008077700007700000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00077000700000077080080700000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00700700700000077000000700000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00000000070000700700007000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00000000007777000077770000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000cc7cc7cccccccccccc7cc7cccccccccc0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000c777777ccc7cc7ccc777777cc7cccc7c0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0070070077000077c777777c77000077c777777c0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00077000708008077700007770000007770000770000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00077000700000077080080770000007709009070000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00700700700000077000000770900907700000070000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000c700007cc700007cc700007cc700007c0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000cc7777cccc7777cccc7777cccc7777cc0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000

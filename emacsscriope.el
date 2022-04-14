@@ -23,10 +23,10 @@
   (interactive)
   (write-file (buffer-name))
   (let ((buf (current-buffer))
-        (buffername (buffer-name)))
+        (cartname (car (split-string (buffer-name) "\\."))))
     (fennel-view-compilation)
     (let* ((fennelbuf (current-buffer))
-           (filename (concat buffername ".p8"))
+           (filename (concat cartname ".p8"))
            (startpoint)
            (endpoint))
       (with-temp-buffer
@@ -49,3 +49,5 @@
         (write-file filename))
       (kill-buffer fennelbuf))
     (set-buffer buf)))
+
+(provide 'build-to-pico)

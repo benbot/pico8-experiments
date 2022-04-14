@@ -1,4 +1,4 @@
-(global p
+(global pet
  {:x 58
   :y 58
   :maxspeed 0.5
@@ -7,11 +7,12 @@
   :acc [0 0]
   :startframe 1
   :frame 1
-  :maxframe 1
-  :direction 4})
+  :anim-length 1
+  :hunger 50
+  :maxhunger 100
+  :direction [1 0]})
 
-(global directions [
-                    [0 0]
+(global directions [[0 0]
                     [0 0]
                     [0 0]
                     [0 0]
@@ -23,8 +24,11 @@
                     [-1 -1]
                     [0 -1]
                     [1 -1]
-                    [-1 1]
-                    ])
+                    [-1 1]])
+(var fc 1)
+(macro every [n frames body]
+  `(if (= 0 (% fc ,n))
+       ,body))
 
 (fn make-window [name x y w h drawfn]
   (local name
@@ -35,48 +39,65 @@
             :text-lines []
             :drawfn (if drawfn
                         drawfn
-                        (lambda []))
-            }))
+                        (lambda []))}))
 
 
-(fn draw-player []
-  (spr p.frame p.x p.y))
+(fn draw-pet []
+  (palt 0 nil)
+  (palt 12 t)
+  (spr pet.frame pet.x pet.y)
+  (palt 0 t)
+  (palt 12 nil))
 
-(local init-dir-timer 1)
-(var dir-timer init-dir-timer)
-(var last-time 0)
+(fn idle-anim []
+  (every 30 frames
+         (if (= pet.frame (+ pet.startframe pet.anim-length))
+             (set pet.frame pet.startframe)
+             (set pet.frame (+ 1 pet.frame)))))
 
-(fn player-update []
-  (local time (t))
-  (local delta (- time last-time))
-  (if (<= dir-timer 0)
-      (do
-        (set p.direction (+ 1 (flr (rnd (length directions)))))
-        (set dir-timer init-dir-timer))
-      (set dir-timer (- dir-timer delta)))
-  (set p.frame (+ p.startframe (% (* (t) 2) (+ 1 p.maxframe))))
-  (set p.x (+ p.x (* p.maxspeed (. (. directions p.direction) 1))))
-  (set p.y (+ p.y (* p.maxspeed (. (. directions p.direction) 2))))
+(fn change-dir []
+  (let [walk-chance (flr (rnd 100))]
+    (if (< walk-chance 30)
+        (do
+          (set pet.direction (flr (rnd (length directions))))))))
 
-  (if (> p.x 120)
-      (set p.x 120))
-  (if (< p.x 0)
-      (set p.x 0))
-  (if (> p.y 120)
-      (set p.y 120))
-  (if (< p.y 0)
-      (set p.y 0))
+(macro ensure [prop f limit]
+  `(if (,f ,limit ,prop)
+      (set ,prop ,limit)))
+(fn walk []
+  (set pet.x
+       (+ pet.x
+          (* pet.maxspeed
+             (. pet.direction 1))))
+  (set pet.y
+       (+ pet.y
+          (* pet.maxspeed
+             (. pet.direction 2))))
+  (ensure pet.x < 120)
+  (ensure pet.x > 0)
+  (ensure pet.y < 120)
+  (ensure pet.y > 0 )
+  )
 
 
-  (set last-time time))
+(fn pet-update []
+  (idle-anim)
+  (walk)
+
+  (every 20 frames
+         (if (< 45 (flr (rnd 100)))
+             (set pet.direction (rnd directions))))
+
+  (if (< pet.hunger 10)
+      (set pet.startframe 3)))
 
 (fn _init []
   (music 0))
-
 (fn _update []
-  (player_update))
-
+  (pet_update))
 (fn _draw []
-  (cls 0)
-  (draw-player)
-  )
+  (cls 15)
+  (draw-pet)
+  (print (. pet.direction 1) 0)
+  (print pet.y 0)
+  (set fc (+ fc 1)))
